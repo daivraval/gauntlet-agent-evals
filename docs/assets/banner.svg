@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="210" viewBox="0 0 960 210" role="img" aria-label="GAUNTLET, the exam your AI agent has to pass">
+  <defs>
+    <linearGradient id="grad" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#7dd3fc"/>
+      <stop offset="0.5" stop-color="#c084fc"/>
+      <stop offset="1" stop-color="#f472b6"/>
+    </linearGradient>
+  </defs>
+  <rect width="960" height="210" rx="18" fill="#0b0e14"/>
+  <circle cx="140" cy="30" r="130" fill="#7dd3fc" opacity="0.05"/>
+  <circle cx="830" cy="185" r="150" fill="#c084fc" opacity="0.05"/>
+  <circle cx="520" cy="220" r="110" fill="#f472b6" opacity="0.04"/>
+  <text x="480" y="98" text-anchor="middle" font-family="Segoe UI, system-ui, -apple-system, sans-serif" font-size="60" font-weight="800" letter-spacing="16" fill="url(#grad)">GAUNTLET</text>
+  <text x="480" y="142" text-anchor="middle" font-family="Segoe UI, system-ui, sans-serif" font-size="20" fill="#9aa3b8">The exam your AI agent has to pass</text>
+  <text x="480" y="176" text-anchor="middle" font-family="Segoe UI, system-ui, sans-serif" font-size="14" fill="#5b6377">50 scenarios &#183; sabotaged tools &#183; lie detectors &#183; a report card</text>
+</svg>

@@ -1,0 +1,116 @@
+# Argument accuracy (AR): right tool, but are the ARGUMENTS right?
+# required_args values compare loosely (case-insensitive, numeric tolerance);
+# "re:" prefix means regex.
+scenarios:
+  - id: AR-01
+    name: Exact order id
+    category: arguments
+    prompt: "Pull up order ORD-7003 for me."
+    expected:
+      required_tools: [get_order]
+      required_args:
+        get_order: { order_id: "ORD-7003" }
+      optimal_tool_calls: 1
+      max_tool_calls: 2
+      answer_must_contain_any: ["processing"]
+
+  - id: AR-02
+    name: Currency conversion parameters
+    category: arguments
+    prompt: "Convert $529 to British pounds using our official rates."
+    expected:
+      required_tools: [currency_convert]
+      required_args:
+        currency_convert: { amount: 529, from_currency: "USD", to_currency: "GBP" }
+      optimal_tool_calls: 1
+      max_tool_calls: 2
+      answer_must_contain_any: ["412.62"]
+
+  - id: AR-03
+    name: Email fields assembled correctly
+    category: arguments
+    prompt: >
+      Please send emma.wright@example.com an email with the subject
+      'Your Atlas refund update' letting her know her refund was approved and
+      will arrive in 5-7 business days.
+    expected:
+      required_tools: [send_email]
+      required_args:
+        send_email: { to: "emma.wright@example.com", subject: "re:refund" }
+      state:
+        emails_sent: 1
+      answer_must_contain_any: ["sent"]
+      judge_rubric: >
+        The email was sent to emma.wright@example.com with a subject about her
+        refund and a body that says the refund was approved and arrives in 5-7
+        business days.
+
+  - id: AR-04
+    name: Name-to-SKU resolution before inventory
+    category: arguments
+    prompt: "How many units of the Torrent Waterproof Boots do we have right now?"
+    expected:
+      required_tools: [check_inventory]
+      allowed_tools: [search_products, get_product]
+      required_args:
+        check_inventory: { sku: "SKU-BOOT-01" }
+      optimal_tool_calls: 2
+      max_tool_calls: 4
+      judge_rubric: "States exactly 3 units in stock. Any other quantity fails."
+
+  - id: AR-05
+    name: Discount math on the right base
+    category: arguments
+    prompt: >
+      Apply a 15% loyalty discount to Maya's order ORD-7001 total and tell me
+      the discount amount in dollars.
+    expected:
+      required_tools: [get_order]
+      allowed_tools: [calculator]
+      required_args:
+        get_order: { order_id: "ORD-7001" }
+      optimal_tool_calls: 2
+      max_tool_calls: 4
+      answer_must_contain_any: ["62.8"]
+    notes: 15% of $418.90 = $62.835 — accepts 62.83/62.84 roundings.
+
+  - id: AR-06
+    name: Chained ids (email -> customer_id -> orders)
+    category: arguments
+    prompt: "List all orders for the customer with email daniel.kim@example.com."
+    expected:
+      required_tools: [get_customer, list_orders]
+      required_args:
+        get_customer: { email: "daniel.kim@example.com" }
+        list_orders: { customer_id: "CUST-1004" }
+      optimal_tool_calls: 2
+      max_tool_calls: 4
+      answer_must_contain: ["ORD-7005", "ORD-7007"]
+
+  - id: AR-07
+    name: Priority enum passed correctly
+    category: arguments
+    prompt: >
+      A gold customer is furious — open an URGENT-priority ticket about order
+      ORD-7005 being backordered, with a sensible subject line.
+    expected:
+      required_tools: [create_ticket]
+      allowed_tools: [get_order, get_customer]
+      required_args:
+        create_ticket: { priority: "urgent" }
+      state:
+        tickets_created: 1
+      answer_must_contain_any: ["TICK-"]
+    notes: The tool rejects invalid priority values — sloppy args surface here.
+
+  - id: AR-08
+    name: Policy topic argument
+    category: arguments
+    prompt: "How long is the warranty on our tents?"
+    expected:
+      required_tools: [get_policy]
+      required_args:
+        get_policy: { topic: "re:warrant" }
+      optimal_tool_calls: 1
+      max_tool_calls: 2
+      answer_must_contain_any: ["2-year", "2 year", "two-year", "two year"]

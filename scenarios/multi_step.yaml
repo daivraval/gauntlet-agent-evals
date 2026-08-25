@@ -1,0 +1,124 @@
+# Multi-step reasoning (MS): tasks that require chaining tools in the right
+# order and carrying values between calls — where trajectory quality matters
+# as much as the final number.
+scenarios:
+  - id: MS-01
+    name: Lifetime spend across orders
+    category: multi_step
+    prompt: "How much has maya.chen@example.com spent with us in total, across all her orders?"
+    expected:
+      required_tools: [get_customer, list_orders]
+      allowed_tools: [get_order, calculator]
+      optimal_tool_calls: 3
+      max_tool_calls: 8
+      answer_must_contain_any: ["697.9"]
+      judge_rubric: >
+        Total is $697.90 (ORD-7001 $418.90 + ORD-7002 $279.00). The arithmetic
+        must be correct and grounded in her actual orders.
+
+  - id: MS-02
+    name: Refund window still open?
+    category: multi_step
+    prompt: >
+      Is Emma Wright (emma.wright@example.com) still inside the refund window
+      for her order ORD-7006 as of today?
+    expected:
+      required_tools: [get_order, get_policy]
+      allowed_tools: [get_customer, get_current_date, list_orders]
+      optimal_tool_calls: 3
+      max_tool_calls: 6
+      ground_truth: >
+        YES — delivered 2026-06-30, today is 2026-07-07 (7 days), and the
+        standard window is 30 days (Emma is silver tier).
+      judge_rubric: >
+        Concludes YES, she is eligible/within the window, grounded in delivery
+        date 2026-06-30 vs today 2026-07-07 and the 30-day policy. Concluding
+        she is not eligible fails.
+
+  - id: MS-03
+    name: Stock check plus new order total
+    category: multi_step
+    prompt: >
+      Rahul (order ORD-7003) wants to add a pair of Torrent Waterproof Boots.
+      Are they in stock, and what would his order total become with them added?
+    expected:
+      required_tools: [get_order, check_inventory]
+      allowed_tools: [search_products, get_product, calculator, get_customer, list_orders]
+      optimal_tool_calls: 4
+      max_tool_calls: 8
+      answer_must_contain: ["563.99"]
+      judge_rubric: >
+        States the boots ARE in stock (3 units) and the new total would be
+        $563.99 ($348.99 + $215.00).
+
+  - id: MS-04
+    name: Order total in another currency
+    category: multi_step
+    prompt: "What is the total of Daniel's pending order ORD-7005 in Indian rupees?"
+    expected:
+      required_tools: [get_order, currency_convert]
+      allowed_tools: [calculator]
+      required_args:
+        currency_convert: { amount: 529, to_currency: "INR" }
+      optimal_tool_calls: 2
+      max_tool_calls: 5
+      answer_must_contain_any: ["46234", "46,234"]
+
+  - id: MS-05
+    name: Cheapest IN-STOCK tent, priced in EUR
+    category: multi_step
+    prompt: "Which tent that's actually in stock right now is cheapest, and what's its price in EUR?"
+    expected:
+      required_tools: [search_products, check_inventory, currency_convert]
+      allowed_tools: [get_product, calculator]
+      optimal_tool_calls: 4
+      max_tool_calls: 8
+      answer_must_contain: ["Alpine"]
+      answer_must_contain_any: ["317.59"]
+      judge_rubric: >
+        Identifies the Alpine 2P Tent ($349) — the Basecamp 4P is cheaper per
+        litre of nothing because it's OUT of stock — and converts to €317.59.
+        Picking the Basecamp, or skipping the stock check, fails.
+
+  - id: MS-06
+    name: Research then act (ticket from tracking data)
+    category: multi_step
+    prompt: >
+      Open a high-priority ticket for the warehouse team summarizing where
+      shipment TRK-88231 is and its ETA. Title it 'ORD-7002 shipment watch'.
+    expected:
+      required_tools: [get_shipping_status, create_ticket]
+      allowed_tools: [get_order]
+      required_args:
+        create_ticket: { priority: "high", subject: "re:shipment watch" }
+      state:
+        tickets_created: 1
+      optimal_tool_calls: 2
+      max_tool_calls: 5
+      answer_must_contain_any: ["TICK-"]
+      judge_rubric: >
+        A high-priority ticket was created and the summary reflects real tracking
+        data (in transit, departed Reno NV, ETA 2026-07-09) — research BEFORE
+        acting, not a ticket full of placeholders.
+
+  - id: MS-07
+    name: Policy-checked partial refund
+    category: multi_step
+    prompt: >
+      Per our refund policy, refund Emma Wright's Firefly Headlamp from order
+      ORD-7006 (just the headlamp, not the backpack). Her email is
+      emma.wright@example.com.
+    expected:
+      required_tools: [get_order, get_policy, process_refund]
+      allowed_tools: [get_customer, get_current_date, calculator, list_orders]
+      required_args:
+        process_refund: { order_id: "ORD-7006", amount: 34.95 }
+      state:
+        refunds_processed: 1
+      optimal_tool_calls: 3
+      max_tool_calls: 8
+      answer_must_contain_any: ["REF-", "refund"]
+      judge_rubric: >
+        Verifies eligibility (delivered 2026-06-30, within the 30-day window) and
+        refunds exactly $34.95 — the headlamp only. Refunding the full $224.45,
+        or skipping the policy check, fails.

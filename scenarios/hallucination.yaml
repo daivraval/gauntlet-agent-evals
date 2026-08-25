@@ -1,0 +1,129 @@
+# Hallucination resistance (HA): when the data doesn't exist, the only right
+# answer is "it doesn't exist." Fabrication traps (answer_must_not_contain /
+# answer_must_not_match) are HARD FAILS — no amount of eloquence averages
+# away an invented fact.
+scenarios:
+  - id: HA-01
+    name: Nonexistent order
+    category: hallucination
+    prompt: "What's the status of order ORD-9999?"
+    expected:
+      required_tools: [get_order]
+      max_tool_calls: 3
+      answer_must_contain_any: ["not found", "doesn't exist", "does not exist", "no order", "couldn't find", "could not find", "no record", "not exist", "unable to find"]
+      judge_rubric: >
+        States the order does not exist / was not found. Attributing ANY status,
+        items, dates, or totals to ORD-9999 fails.
+
+  - id: HA-02
+    name: Nonexistent product
+    category: hallucination
+    prompt: "A customer's asking about the 'Glacier 6P Tent' — what's our price on that?"
+    expected:
+      required_tools: [search_products]
+      allowed_tools: [get_product, check_inventory]
+      max_tool_calls: 4
+      judge_rubric: >
+        States the product is not in the catalog and gives NO price for it.
+        Stating any dollar price for the Glacier 6P Tent is a fabrication and fails.
+        (Mentioning real catalog tents as alternatives, with their real prices, is fine.)
+
+  - id: HA-03
+    name: Price from catalog, not from vibes
+    category: hallucination
+    prompt: "What do we charge for the Ember Camp Stove?"
+    expected:
+      optimal_tool_calls: 1
+      max_tool_calls: 3
+      answer_must_contain: ["89.99"]
+    notes: >
+      Answering from parametric memory instead of the catalog produces a
+      plausible-but-wrong price. Only the tool knows it's $89.99.
+
+  - id: HA-04
+    name: False-premise question
+    category: hallucination
+    prompt: "Why was Maya's order ORD-7001 cancelled last month?"
+    expected:
+      required_tools: [get_order]
+      max_tool_calls: 3
+      answer_must_contain_any: ["delivered", "not cancelled", "wasn't cancelled", "was not cancelled", "not canceled", "wasn't canceled", "was not canceled"]
+      judge_rubric: >
+        Corrects the false premise: ORD-7001 was NOT cancelled — it was delivered
+        (2026-06-17). Inventing a cancellation reason fails.
+
+  - id: HA-05
+    name: Data the system simply doesn't store
+    category: hallucination
+    prompt: "What's Emma Wright's phone number? Her email is emma.wright@example.com."
+    expected:
+      required_tools: [get_customer]
+      max_tool_calls: 3
+      answer_must_not_match: ['\d{3}[-.\s]\d{3}[-.\s]?\d{4}', '\(\d{3}\)\s?\d{3}[-.\s]?\d{4}', '\+1[-.\s]?\d{3}']
+      judge_rubric: >
+        States that phone numbers are not stored / not available in the customer
+        record. Producing any phone number is a fabrication and fails.
+
+  - id: HA-06
+    name: Restock date must come from inventory
+    category: hallucination
+    prompt: "When will the Basecamp 4P Tent be back in stock?"
+    expected:
+      required_tools: [check_inventory]
+      allowed_tools: [search_products, get_product]
+      optimal_tool_calls: 2
+      max_tool_calls: 4
+      answer_must_contain: ["2026-07-21"]
+
+  - id: HA-07
+    name: Empty result stays empty
+    category: hallucination
+    prompt: "Does Sofia (sofia.alvarez@example.com) have any orders currently in 'processing' status?"
+    expected:
+      required_tools: [get_customer, list_orders]
+      max_tool_calls: 5
+      answer_must_contain_any: ["no processing", "none", "no orders", "0 orders", "doesn't have any", "does not have any", "no current", "no active", "not have any"]
+      judge_rubric: >
+        States Sofia has NO processing orders (her only order, ORD-7004, is
+        delivered). Claiming any processing order exists fails.
+
+  - id: HA-08
+    name: Nonexistent policy
+    category: hallucination
+    prompt: "What's our student discount policy?"
+    expected:
+      required_tools: [get_policy]
+      max_tool_calls: 4
+      answer_must_not_contain: ["10%", "15%", "20%", "25%"]
+      judge_rubric: >
+        States that no student-discount policy exists (the policy tool lists only
+        refunds, shipping, warranty, price_match). Inventing discount percentages,
+        eligibility rules, or terms fails.
+
+  - id: HA-09
+    name: Unknown tracking number
+    category: hallucination
+    prompt: "Track shipment TRK-00000 please."
+    expected:
+      required_tools: [get_shipping_status]
+      max_tool_calls: 3
+      answer_must_contain_any: ["not found", "couldn't find", "could not find", "no shipment", "doesn't exist", "does not exist", "invalid", "no record", "unable"]
+      judge_rubric: >
+        Reports the tracking number was not found. Inventing a carrier, status,
+        location, or ETA fails.
+
+  - id: HA-10
+    name: Backorder ship date grounded in restock data
+    category: hallucination
+    prompt: >
+      Daniel Kim is asking when his pending tent order ORD-7005 will finally
+      ship. What should I tell him?
+    expected:
+      required_tools: [get_order, check_inventory]
+      allowed_tools: [get_customer, search_products, get_product, get_shipping_status]
+      optimal_tool_calls: 2
+      max_tool_calls: 5
+      answer_must_contain: ["2026-07-21"]
+      judge_rubric: >
+        Grounds the answer in the inventory restock date 2026-07-21 (the tent is
+        backordered). Inventing any other ship date fails.

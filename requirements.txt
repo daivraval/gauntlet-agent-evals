@@ -1,0 +1,20 @@
+# LLM client (any OpenAI-compatible endpoint: Groq, OpenAI, HF router, Ollama)
+
+openai
+
+# Data models & scenario schemas
+
+pydantic
+pyyaml
+
+# Environment variables
+
+python-dotenv
+
+# Console output & reports
+
+rich
+
+# Testing
+
+pytest

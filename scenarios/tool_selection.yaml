@@ -1,0 +1,133 @@
+# Tool selection (TS): does the agent pick the RIGHT tool — and skip tools
+# when none are needed? All 13 tools are offered in every scenario, so
+# distractors are always live.
+scenarios:
+  - id: TS-01
+    name: Order status lookup
+    category: tool_selection
+    prompt: "What's the current status of order ORD-7002?"
+    expected:
+      required_tools: [get_order]
+      allowed_tools: [get_shipping_status]
+      optimal_tool_calls: 1
+      max_tool_calls: 3
+      answer_must_contain_any: ["shipped", "in transit", "in_transit"]
+
+  - id: TS-02
+    name: Inventory check by SKU
+    category: tool_selection
+    prompt: "Is SKU-TENT-02 currently in stock?"
+    expected:
+      required_tools: [check_inventory]
+      allowed_tools: [get_product]
+      optimal_tool_calls: 1
+      max_tool_calls: 3
+      answer_must_contain_any: ["out of stock", "not in stock", "0 units", "unavailable", "restock", "backorder"]
+      judge_rubric: >
+        States the Basecamp 4P Tent (SKU-TENT-02) is OUT of stock. Mentioning
+        the 2026-07-21 restock date is a bonus, not required. Claiming it is
+        in stock fails.
+
+  - id: TS-03
+    name: General knowledge needs no tools
+    category: tool_selection
+    prompt: "Quick general question: what does 'RAG' stand for in the context of AI systems?"
+    expected:
+      required_tools: []
+      allowed_tools: []
+      optimal_tool_calls: 0
+      answer_must_contain_any: ["retrieval"]
+    notes: Over-tooling test — reaching for company tools here wastes calls.
+
+  - id: TS-04
+    name: Draft an email WITHOUT sending it
+    category: tool_selection
+    prompt: >
+      Draft a short apology email to maya.chen@example.com about the delay on her
+      sleeping-bag order. Just show me the text — do NOT send anything yet.
+    expected:
+      required_tools: []
+      allowed_tools: [get_customer, list_orders, get_order, get_shipping_status]
+      forbidden_tools: [send_email]
+      state:
+        emails_sent: 0
+      judge_rubric: >
+        Provides a draft apology email body. Must NOT claim the email was sent.
+    notes: Instruction-following under a tempting side-effect tool.
+
+  - id: TS-05
+    name: Policy lookup
+    category: tool_selection
+    prompt: "What's our refund window for gold-tier members?"
+    expected:
+      required_tools: [get_policy]
+      allowed_tools: []
+      optimal_tool_calls: 1
+      max_tool_calls: 2
+      answer_must_contain: ["60"]
+
+  - id: TS-06
+    name: Currency question routes to the rates tool
+    category: tool_selection
+    prompt: "How much is the Ridgeline 45L Backpack's price of $189.50 in euros?"
+    expected:
+      required_tools: [currency_convert]
+      allowed_tools: [search_products, get_product]
+      optimal_tool_calls: 1
+      max_tool_calls: 3
+      answer_must_contain_any: ["172.4"]
+    notes: >
+      calculator is the distractor — using memorized FX rates instead of the
+      official rates tool is exactly the bug this catches.
+
+  - id: TS-07
+    name: Simple arithmetic, correct result
+    category: tool_selection
+    prompt: "If a customer buys 3 Firefly Headlamps at $34.95 each, what's the merchandise total?"
+    expected:
+      required_tools: []
+      allowed_tools: [calculator, search_products, get_product]
+      max_tool_calls: 3
+      answer_must_contain: ["104.85"]
+
+  - id: TS-08
+    name: Customer tier lookup
+    category: tool_selection
+    prompt: "Which loyalty tier is rahul.mehta@example.com in?"
+    expected:
+      required_tools: [get_customer]
+      allowed_tools: []
+      optimal_tool_calls: 1
+      max_tool_calls: 2
+      answer_must_contain_any: ["silver"]
+
+  - id: TS-09
+    name: Package location
+    category: tool_selection
+    prompt: "Where is package TRK-88231 right now?"
+    expected:
+      required_tools: [get_shipping_status]
+      allowed_tools: []
+      optimal_tool_calls: 1
+      max_tool_calls: 2
+      answer_must_contain_any: ["reno", "in transit", "in_transit"]
+
+  - id: TS-10
+    name: Refund eligibility needs order AND policy
+    category: tool_selection
+    prompt: >
+      Sofia Alvarez (sofia.alvarez@example.com) wants to return the boots from
+      order ORD-7004 today. Is she eligible under our refund policy?
+    expected:
+      required_tools: [get_order, get_policy]
+      allowed_tools: [get_customer, get_current_date, list_orders]
+      optimal_tool_calls: 3
+      max_tool_calls: 6
+      ground_truth: >
+        NOT eligible. ORD-7004 was delivered 2026-05-28, which is about 40 days
+        before today (2026-07-07). Sofia is bronze tier, so the 30-day window
+        applies (60 days is gold-only). 40 > 30.
+      judge_rubric: >
+        Correctly concludes Sofia is NOT eligible and grounds it in the dates
+        (delivered 2026-05-28, ~40 days ago, 30-day window). Concluding she is
+        eligible fails.
