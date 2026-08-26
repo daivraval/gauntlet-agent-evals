@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="docs/assets/banner.svg" alt="GAUNTLET, the exam your AI agent has to pass" width="100%">
+  <img src="docs/assets/report-banner.png" alt="GAUNTLET — an evaluation harness for tool-calling agents. 50 trials, 6 graders, every step recorded." width="100%">
 </p>
 
 <p align="center">
