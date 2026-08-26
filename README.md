@@ -114,19 +114,49 @@ Every run creates a folder inside `reports/` with three things:
 - **`results.json`**, the complete record of everything, for dashboards or scripts.
 - **`trajectories.jsonl`**, one agent run per line, handy for digging with grep or pandas.
 
-<p align="center">
-  <img src="docs/assets/report-hero.png" alt="The GAUNTLET HTML report, opening on a full-bleed wordmark over an engraved angel" width="100%">
-</p>
-
-Select any trial to unseal its record: the score from every grader, the tool calls the agent actually made with the sabotaged ones marked, and the answer it finally gave.
-
-<p align="center">
-  <img src="docs/assets/report-trials.png" alt="The trials grid with one record unsealed, showing grader scores, tool calls and the final answer" width="100%">
-</p>
-
-The page is keyboard-driven — `T` flips between night and day, `F` cycles the category filter, `←` and `→` step through trials, `Esc` closes the open one.
-
 And two commands worth knowing: `python run_evals.py list` shows all 50 tasks at a glance, and `python run_evals.py show <run folder> --id ER-03` replays any single task step by step in your terminal.
+
+## The report
+
+Every screenshot below is a real run — the built-in offline demo, which costs nothing and finishes in about a second.
+
+**The opening.** How many trials were run, and nothing else. The page is one long scroll from here.
+
+<p align="center">
+  <img src="docs/assets/report-hero.png" alt="The report's opening screen: the GAUNTLET wordmark across the full width, over an engraved angel ringed with marginalia" width="100%">
+</p>
+
+**The premise and the numbers.** What the harness did to the agent, the 14 tools it had available, and the headline result.
+
+<p align="center">
+  <img src="docs/assets/report-record.png" alt="The premise section: an explanation of fault injection, the tool inventory, and the summary statistics" width="100%">
+</p>
+
+**Where it loses points.** Every category, scored and ranked, so a weak spot is obvious at a glance rather than buried in a table.
+
+<p align="center">
+  <img src="docs/assets/report-categories.png" alt="Six category rows, each with an average score and a filled bar" width="100%">
+</p>
+
+**All 50 trials.** Filter by category, or search across ids, names and grader notes.
+
+<p align="center">
+  <img src="docs/assets/report-trials.png" alt="The trials grid: fifty cards, each with its id, name, thumbnail, score and verdict" width="100%">
+</p>
+
+**Unseal any one of them.** This is the part that matters. ER-02 passed with a perfect score — but the record shows the inventory lookup was sabotaged with a timeout *twice* before the agent's third attempt got through. A final-answer-only grader would have seen `42` and learned nothing.
+
+<p align="center">
+  <img src="docs/assets/report-detail.png" alt="One trial unsealed: grader scores, the two sabotaged tool calls and the successful retry, and the final answer" width="100%">
+</p>
+
+**Day or night.** Press `T`. The engravings invert with the palette.
+
+<p align="center">
+  <img src="docs/assets/report-day.png" alt="The same trials grid in day mode, with the artwork inverted to dark-on-paper" width="100%">
+</p>
+
+The whole page is keyboard-driven: `T` flips the theme, `F` cycles the category filter, `←` and `→` step through trials, `Esc` closes the open one.
 
 ## Write your own test, no real coding needed
 
