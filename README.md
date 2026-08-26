@@ -110,9 +110,21 @@ That comparison also returns a failure exit code when quality drops, which means
 
 Every run creates a folder inside `reports/` with three things:
 
-- **`report.html`**, a dark themed web page you can just double-click. Every task expands to show each tool call, with the sabotaged moments highlighted, plus the marks from each grader.
+- **`report.html`**, a single self-contained web page you can just double-click. Nothing to install and nothing to serve: every image is baked into the file, so it opens the same on any machine, offline, years later.
 - **`results.json`**, the complete record of everything, for dashboards or scripts.
 - **`trajectories.jsonl`**, one agent run per line, handy for digging with grep or pandas.
+
+<p align="center">
+  <img src="docs/assets/report-hero.png" alt="The GAUNTLET HTML report, opening on a full-bleed wordmark over an engraved angel" width="100%">
+</p>
+
+Select any trial to unseal its record: the score from every grader, the tool calls the agent actually made with the sabotaged ones marked, and the answer it finally gave.
+
+<p align="center">
+  <img src="docs/assets/report-trials.png" alt="The trials grid with one record unsealed, showing grader scores, tool calls and the final answer" width="100%">
+</p>
+
+The page is keyboard-driven — `T` flips between night and day, `F` cycles the category filter, `←` and `→` step through trials, `Esc` closes the open one.
 
 And two commands worth knowing: `python run_evals.py list` shows all 50 tasks at a glance, and `python run_evals.py show <run folder> --id ER-03` replays any single task step by step in your terminal.
 

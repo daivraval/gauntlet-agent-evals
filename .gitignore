@@ -21,3 +21,9 @@ reports/*
 # OS
 Thumbs.db
 .DS_Store
+
+# Claude Design exports (reference only; the handoff is implemented in
+# gauntlet/report.py and the live art is copied into gauntlet/assets/zine/)
+gauntlet/Gauntlet Interactive Report UI/
+gauntlet/Gauntlet Interactive Report UI-1/
+gauntlet/*.zip
