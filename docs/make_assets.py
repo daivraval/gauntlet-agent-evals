@@ -1,13 +1,14 @@
-"""Regenerates the README images in docs/assets/.
+"""Regenerates the README images in docs/assets/ and the demo page docs/index.html.
 
 Run from the project root:
 
     python docs/make_assets.py
 
 It runs the offline demo suite (no API key, no cost), then saves REAL
-terminal output as SVG images using rich's recording feature. Nothing in
-the README screenshots is mocked up: if the code changes, rerun this and
-the pictures update to match.
+terminal output as SVG images using rich's recording feature, and writes the
+same run out as the browsable report at docs/index.html. Nothing here is
+mocked up: if the code changes, rerun this and every picture and the demo
+page update to match.
 """
 from __future__ import annotations
 
@@ -57,8 +58,14 @@ def main() -> None:
     console.save_svg(str(ASSETS / "trajectory.svg"),
                      title="gauntlet show · scenario ER-01 (a sabotaged tool, then the retry)")
 
+    # 3. the report itself, as the landing page for GitHub Pages. It is a
+    # single self-contained file (art is inlined), so it needs no server.
+    page = ROOT / "docs" / "index.html"
+    page.write_text(report_mod.to_html(report), encoding="utf-8")
+
     print(f"wrote {ASSETS / 'scorecard.svg'}")
     print(f"wrote {ASSETS / 'trajectory.svg'}")
+    print(f"wrote {page} ({page.stat().st_size // 1024} KB)")
 
 
 if __name__ == "__main__":

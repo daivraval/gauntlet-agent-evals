@@ -118,7 +118,9 @@ And two commands worth knowing: `python run_evals.py list` shows all 50 tasks at
 
 ## The report
 
-Every screenshot below is a real run — the built-in offline demo, which costs nothing and finishes in about a second.
+**[Open the live report →](https://daivraval.github.io/gauntlet-agent-evals/)** — a real run you can click through in the browser, no install. The same page ships in the repo at [`docs/index.html`](docs/index.html) if you would rather just open the file.
+
+Every screenshot below is from that same run — the built-in offline demo, which costs nothing and finishes in about a second.
 
 **The opening.** How many trials were run, and nothing else. The page is one long scroll from here.
 
