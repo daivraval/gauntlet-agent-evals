@@ -328,9 +328,17 @@ html[data-theme="dark"]{
 }
 *{box-sizing:border-box}
 html{scroll-behavior:smooth;overflow-x:clip;max-width:100%}
+/* The handoff asks for `transition:background .5s ease,color .5s ease` here.
+   It is left off on purpose: it desynchronises the theme switch. Body's
+   painted background and inherited colour animate over half a second, while
+   every element coloured straight from var(--dim) / var(--ink) — marginalia,
+   chips, labels, stat captions — flips in the same frame as the token. Toggle
+   during that window, or in any context where transitions stall (a hidden or
+   throttled tab), and you get the new background under the old theme's text:
+   near-white on paper, effectively invisible. The theme switch has to be
+   atomic, so nothing here transitions. */
 body{margin:0;background:var(--paper);color:var(--ink);cursor:none;overflow-x:hidden;
-  font:14px/1.75 'Courier Prime','Courier New',monospace;
-  transition:background .5s ease,color .5s ease}
+  font:14px/1.75 'Courier Prime','Courier New',monospace}
 a{color:var(--ink);text-decoration:none}
 a:hover{opacity:.6}
 ::selection{background:var(--ink);color:var(--paper)}

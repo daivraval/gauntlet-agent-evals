@@ -23,7 +23,11 @@ Thumbs.db
 .DS_Store
 
 # Claude Design exports (reference only; the handoff is implemented in
-# gauntlet/report.py and the live art is copied into gauntlet/assets/zine/)
-gauntlet/Gauntlet Interactive Report UI/
-gauntlet/Gauntlet Interactive Report UI-1/
-gauntlet/*.zip
+# gauntlet/report.py and the live art is copied into gauntlet/assets/zine/).
+# Matched at any depth, not just under gauntlet/ - the bundles get re-exported
+# and re-extracted to different places, and one of them is 52MB.
+Gauntlet Interactive Report UI*/
+*.zip
+
+# Local editor / tooling state
+.claude/
